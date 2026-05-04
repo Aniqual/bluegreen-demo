@@ -36,12 +36,9 @@ pipeline {
     stage('Health Check') {
       steps {
         sh """
-          SLOT_IP=\$(kubectl get endpoints myapp-${params.DEPLOY_SLOT}-svc \
-            -o jsonpath='{.subsets[0].addresses[0].ip}' 2>/dev/null || \
-            kubectl get pod -l env=${params.DEPLOY_SLOT} \
-            -o jsonpath='{.items[0].status.podIP}')
-          echo "Slot IP: \$SLOT_IP"
-          curl -f http://\$SLOT_IP:8080/health || exit 1
+          POD=\$(kubectl get pod -l env=${params.DEPLOY_SLOT} -o jsonpath='{.items[0].metadata.name}')
+          echo "Checking pod: \$POD"
+          kubectl exec \$POD -- wget -qO- http://localhost:8080/health
           echo "Health check passed!"
         """
       }
