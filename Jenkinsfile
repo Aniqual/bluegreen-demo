@@ -38,7 +38,7 @@ pipeline {
         sh """
           POD=\$(kubectl get pod -l env=${params.DEPLOY_SLOT} -o jsonpath='{.items[0].metadata.name}')
           echo "Checking pod: \$POD"
-          kubectl exec \$POD -- wget -qO- http://localhost:8080/health
+          kubectl exec \$POD -- python3 -c "import urllib.request; r=urllib.request.urlopen('http://localhost:8080/health'); print(r.read())"
           echo "Health check passed!"
         """
       }
